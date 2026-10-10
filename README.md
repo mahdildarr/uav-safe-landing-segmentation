@@ -20,13 +20,20 @@ A drone that has to land outside a prepared site (after a link loss, on low batt
 
 The full experiment design is in [docs/DESIGN.md](docs/DESIGN.md).
 
-## Roadmap
+## Progress
 
-- [x] Data preparation, training, landing-zone search and evaluation pipeline, tested on synthetic data
+- [x] U-Net implemented from scratch and pretrained-encoder baselines
+- [x] Landing taxonomy for the Semantic Drone Dataset
+- [x] Dice, focal and weighted losses
+- [x] Landing-zone search with static and dynamic clearances
+- [x] Landing metrics against the ground truth
+- [x] Random vs blocked validation split
 - [x] ONNX export and INT8 benchmark
-- [ ] U-Net from scratch vs pretrained encoders on the Semantic Drone Dataset
-- [ ] Loss comparison and class weighting
-- [ ] Random vs blocked validation split
+- [x] Unit tests, end-to-end test and Colab notebook
+
+Next:
+
+- [ ] Model and loss comparison on the Semantic Drone Dataset
 - [ ] Deployment benchmark on CPU
 
 ## Code
