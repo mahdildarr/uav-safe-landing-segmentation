@@ -4,16 +4,16 @@ How the experiments are designed: the data, the networks and losses, the landing
 
 ## 1. Problem
 
-An unmanned aerial vehicle that has to land outside a prepared site — after a link loss, low battery or a delivery — must decide **where** it can touch down. From a downward-looking camera this is a dense prediction problem: every pixel must be assigned to a surface or an object, and the decision depends on small, rare classes (people, vehicles, poles) at least as much as on large ones (grass, pavement).
+An unmanned aerial vehicle that has to land outside a prepared site (after a link loss, low battery or a delivery) must decide **where** it can touch down. From a downward-looking camera this is a dense prediction problem: every pixel must be assigned to a surface or an object, and the decision depends on small, rare classes (people, vehicles, poles) at least as much as on large ones (grass, pavement).
 
 The project has two parts:
 
 1. **Semantic segmentation** of high-resolution nadir images with a U-Net written from scratch and pretrained-encoder baselines.
-2. **Safe landing-zone search**: explicit, explainable rules on top of the segmentation output, evaluated against the ground truth with landing-level metrics — not only pixel metrics.
+2. **Safe landing-zone search**: explicit, explainable rules on top of the segmentation output, evaluated against the ground truth with landing-level metrics: not only pixel metrics.
 
 ## 2. Data
 
-**Semantic Drone Dataset** (Graz University of Technology): 400 publicly available training images of 6000 × 4000 px, captured at nadir from 5–30 m above more than 20 houses, with pixel-accurate labels for 20 object classes plus auxiliary labels (bald tree, AR marker, conflicting). Licence: non-commercial use, no redistribution — the data is not included in the repositories.
+**Semantic Drone Dataset** (Graz University of Technology): 400 publicly available training images of 6000 × 4000 px, captured at nadir from 5–30 m above more than 20 houses, with pixel-accurate labels for 20 object classes plus auxiliary labels (bald tree, AR marker, conflicting). Licence: non-commercial use, no redistribution: the data is not included in the repositories.
 
 **Landing taxonomy.** For a landing decision many source classes are equivalent (window, wall, roof, door → *structure*), while others need different safety margins. Source classes are mapped **by name** to eight decision-relevant classes:
 
@@ -34,14 +34,14 @@ Unlabelled and conflicting pixels are ignored in the loss and the metrics. The f
 
 **Augmentation.** Random scale (altitude change), flips and 90° rotations (a nadir view has no canonical "up"), colour jitter (lighting, season), mild noise and motion blur.
 
-## 3. Splits — measuring near-duplicate leakage
+## 3. Splits: measuring near-duplicate leakage
 
 Consecutive frames of a flight overlap, so a random image-level split can put almost the same view in training and evaluation.
 
 * The **test set is fixed** for every experiment: contiguous blocks of 20 images (sorted by id), so neighbouring frames never straddle the test boundary.
 * Only the train/validation division of the remaining images changes: **blocked** (validation made of whole blocks) or **random** (validation images drawn independently, most of them with overlapping neighbours in training).
 
-Because the test set is identical in both modes, the difference between validation and test score directly measures how much a random split overstates performance — and whether it misleads model selection.
+Because the test set is identical in both modes, the difference between validation and test score directly measures how much a random split overstates performance, and whether it misleads model selection.
 
 ## 4. Networks
 
@@ -53,7 +53,7 @@ Because the test set is identical in both modes, the difference between validati
 
 Skip connections carry the fine spatial detail that thin objects (people, fence poles, bicycles) need; this is the main reason for the U-Net design in aerial scenes.
 
-## 5. Class imbalance — losses
+## 5. Class imbalance: losses
 
 Ground classes cover most pixels; people and vehicles cover well under 1 %. Compared on the same model and split:
 
@@ -68,18 +68,18 @@ Ground classes cover most pixels; people and vehicles cover well under 1 %. Comp
 
 Given the class probabilities, a zone is a circle of diameter *footprint* that satisfies:
 
-1. **Surface** — the whole footprint lies on a safe surface predicted with confidence ≥ 0.6 (uncertain pixels count as unsafe);
-2. **Static clearance** — a margin from structures, vegetation, water and obstacles;
-3. **Dynamic clearance** — a larger margin from people and vehicles.
+1. **Surface**: the whole footprint lies on a safe surface predicted with confidence ≥ 0.6 (uncertain pixels count as unsafe);
+2. **Static clearance**: a margin from structures, vegetation, water and obstacles;
+3. **Dynamic clearance**: a larger margin from people and vehicles.
 
 Distances come from Euclidean distance transforms, so the search runs in milliseconds on a CPU. Feasible positions are ranked by clearance, mean confidence inside the footprint and distance from the image centre, and thinned with non-maximum suppression (top 3). Sizes are configured in metres and converted with the ground sampling distance (altitude, sensor width, focal length), or set directly in pixels.
 
-**Landing metrics** — the same rules are applied to the ground-truth mask (with confidence 1), which defines where a zone is *admissible*. Proposed zones are then checked against it:
+**Landing metrics**: the same rules are applied to the ground-truth mask (with confidence 1), which defines where a zone is *admissible*. Proposed zones are then checked against it:
 
 | Metric | Meaning |
 |---|---|
 | zone precision | share of proposed zones whose centre is admissible in the ground truth |
-| hazard violation rate | share of proposed zones with a non-safe ground-truth pixel inside the footprint — the safety-critical number |
+| hazard violation rate | share of proposed zones with a non-safe ground-truth pixel inside the footprint: the safety-critical number |
 | availability recall | among images where the ground truth admits a zone, share where a safe zone is proposed |
 | false-alarm rate | among images where no zone is admissible, share where one is proposed anyway |
 
@@ -102,4 +102,4 @@ The trained network is exported to ONNX and quantised to INT8 (static quantisati
 3. T.-Y. Lin et al., "Focal Loss for Dense Object Detection," *ICCV*, 2017.
 4. F. Milletari, N. Navab, S.-A. Ahmadi, "V-Net: Fully Convolutional Neural Networks for Volumetric Medical Image Segmentation," *3DV*, 2016 (Dice loss).
 5. D. Eigen, R. Fergus, "Predicting Depth, Surface Normals and Semantic Labels with a Common Multi-Scale Convolutional Architecture," *ICCV*, 2015 (median-frequency balancing).
-6. Semantic Drone Dataset, Institute of Computer Graphics and Vision, Graz University of Technology — https://ivc.tugraz.at/research-project/semantic-drone-dataset/
+6. Semantic Drone Dataset, Institute of Computer Graphics and Vision, Graz University of Technology: https://ivc.tugraz.at/research-project/semantic-drone-dataset/
