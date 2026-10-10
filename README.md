@@ -4,7 +4,7 @@ Where can a drone land safely when it has to come down outside a prepared site? 
 
 <p align="center"><img src="docs/assets/pipeline.svg" width="100%" alt="Pipeline"></p>
 
-> **Status:** 🚧 Work in progress — pipeline implemented and tested; experiments on the Semantic Drone Dataset running.
+> **Status:** Work in progress — pipeline implemented and tested; experiments on the Semantic Drone Dataset running.
 > This repository presents the project and its design. **The source code is kept in a private repository** and can be shared on request.
 
 ## Why this project
